@@ -12,7 +12,7 @@ func main() {
 	cmd := exec.Command("bash")
 	cmd.SysProcAttr = &syscall.SysProcAttr{
 		// 创建新的 PID  Namespace。
-		Cloneflags: syscall.CLONE_NEWPID,
+		Cloneflags: syscall.CLONE_NEWPID | syscall.CLONE_NEWNS,
 	}
 
 	cmd.Stdin = os.Stdin

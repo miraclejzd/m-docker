@@ -166,3 +166,117 @@ root@master-58:/home/jzd/projects/m-docker/basics/namespace/src# ps -a
 ```
 
 太对啦！现在 proc 文件系统只显示当前 PID ns 下的进程，连自己老爹都不认识了。
+
+### Mount namespace
+
+上面对 PID ns 的操作中刚好提到了 Mount ns，我们趁热打铁，来看看 Mount ns 的操作吧。
+
+讲个冷知识，Mount ns 是 Linux 的第一个 namespace，地位相当重要，它用来隔离各个进程的挂载点视图。众所周知，Linux 的挂载功能十分的强大，我们可以通过挂载来改变目录树的层级结构，就像这样：
+
+```
+     目录树(当前为rootfs)     tmpfs                             目录树(rootfs+tmpfs)
+	    /                 /            mount tmpfs /var         /
+	    ├── home          ├── file1    ───────────────>         ├── home
+	    ├── usr           └── file2                             ├── usr
+	    └── var                                                 └── var 
+                                                                         ├── file1
+                                                                         └── file2
+```
+
+而 Mount ns 的作用就是让不同的进程能看到的挂载点不一样，这样就可以实现文件系统的隔离。
+
+我们修改一下代码，创建新的 Mount namespace：
+
+```go
+	cmd.SysProcAttr = &syscall.SysProcAttr{
+		// 创建新的 PID 和 Mount Namespace。
+		Cloneflags: syscall.CLONE_NEWPID | syscall.CLONE_NEWNS,
+	}
+```
+
+运行并测试：
+
+```bash
+# 编译并运行
+jzd@master-58:~/projects/m-docker/basics/namespace/src$ go build && sudo ./namespace
+
+# 查看 /proc
+root@master-58:/home/jzd/projects/m-docker/basics/namespace/src$ ls /proc
+124  140      18      193495  226023  252     265663   280379   2840761  286094   3        32       3853953  403  501     539911  580493  598     656729  67489   686420  71792   786872  885 ...
+```
+
+咦？怎么设置了新的 Mount ns 后，挂载点还和父进程的一样？
+
+查阅了之后才明白：即使设置了新的 Mount ns，子进程依旧会继承父进程的所有挂载点，并不会将全部挂载点清空（不然的话根文件系统都不会挂载在目录树上，我们的目录树应该是空的），只是后续在子进程进行挂载操作，不会影响到父进程。
+
+原来如此，那我们在子进程挂载重新挂载 proc 文件系统 ，看看会不会影响到父进程：
+
+```bash
+# 子进程重新挂载 proc 文件系统
+root@master-58:/home/jzd/projects/m-docker/basics/namespace/src# mount -t proc proc /proc
+
+# 子进程查看 /proc
+root@master-58:/home/jzd/projects/m-docker/basics/namespace/src$ ls /proc
+1     asound      bus      consoles  devices    driver         fb           interrupts  irq       keys       kpagecgroup  loadavg  meminfo  mounts  pagetypeinfo  schedstat  slabinfo  swaps ...
+```
+
+在宿主机上重新打开一个 bash 终端（和父进程同级，我称为叔叔进程）：
+```bash
+# 叔叔进程查看 /proc
+jzd@master-58:~$ ls /proc
+1     asound      bus      consoles  devices    driver         fb           interrupts  irq       keys       kpagecgroup  loadavg  meminfo  mounts  pagetypeinfo  schedstat  slabinfo  swaps ...
+```
+
+怎么回事？子进程的 proc 文件系统重新挂载后，叔叔进程的 proc 文件系统也被影响了？Mount ns 没起到作用呀！
+
+我们先解除子进程的 proc 文件系统挂载，免得影响宿主机的使用：
+
+```bash
+# 在子进程上 umount
+root@master-58:/home/jzd/projects/m-docker/basics/namespace/src# umount proc
+```
+
+又查阅了一些资料后才明白：Linux 具有 `shared subtree` 机制，这个机制的优先级高于 Mount ns。
+
+简单来说 `shared subtree` 机制有 2 个条件：
+- 两个挂载点属于同一个 `peer group`
+- 他们的 `propagate type` 均为 `shared`
+  
+满足这 2 个条件的话，这两个挂载点所在的目录，以及它所有子目录里任何挂载操作都会被同步。
+
+我们看看父子进程是否满足这 2 个条件：
+- 子进程会完全继承父进程的所有挂载点，合理推断它们的确在同一个 `peer group`，满足。
+- 子进程会继承父进程的所有挂载点，那我们只要看父进程的 `/proc` 挂载点是否为 `shared` 类型即可，待验证。
+
+验证一下：
+```bash
+# 查看叔叔进程的 /proc 挂载点类型
+jzd@master-58:~$ cat /proc/self/mountinfo | grep /proc | grep shared
+25 30 0:23 / /proc rw,nosuid,nodev,noexec,relatime shared:59 - proc proc rw
+38 25 0:33 / /proc/sys/fs/binfmt_misc rw,relatime shared:61 - autofs systemd-1 rw,fd=29,pgrp=1,timeout=0,minproto=5,maxproto=5,direct,pipe_ino=22032
+116 38 0:37 / /proc/sys/fs/binfmt_misc rw,nosuid,nodev,noexec,relatime shared:99 - binfmt_misc binfmt_misc rw
+```
+
+果然啊，父进程的 `/proc` 挂载点类型为 `shared`，所以子进程继承之后也为 `shared`，确实会同步！如何解决呢？
+
+很简单，我们只需要让子进程的 `/proc` 目录不为 `shared` 即可，查阅资料后发现，`propagate type` 可以设置为 `private`，这样就不会同步了：
+
+```bash
+# 子进程递归地将 /proc 及其子目录设置为 private
+root@master-58:/home/jzd/projects/m-docker/basics/namespace/src# mount --make-rprivate /proc
+
+# 重新挂载 proc 文件系统并查看
+root@master-58:/home/jzd/projects/m-docker/basics/namespace/src# mount -t proc proc /proc
+root@master-58:/home/jzd/projects/m-docker/basics/namespace/src# ls /proc
+1     asound      bus      consoles  devices    driver         fb           interrupts  irq       keys
+```
+
+我们打开叔叔进程，看看会不会有影响：
+```bash
+# 叔叔进程查看 /proc
+jzd@master-58:~$ ls /proc
+1    124  140      18      193495  230546  253     267940   2840759  295315  301133   30564   311062  323 ...
+```
+
+太对啦！叔叔进程的 proc 文件系统没有被影响，Mount ns 真的起作用了。
+
