@@ -90,7 +90,7 @@ jzd@master-58:~$ cat /proc/sys/user/max_pid_namespaces
 
 源代码可见 [这里](./src/main.go)。
 
-### PID namespace
+### 2.1. PID namespace
 
 我们写一个程序，创建一个 bash 子进程，并为这个子进程创建新的 PID namespace：
 
@@ -167,7 +167,7 @@ root@master-58:/home/jzd/projects/m-docker/basics/namespace/src# ps -a
 
 太对啦！现在 proc 文件系统只显示当前 PID ns 下的进程，连自己老爹都不认识了。
 
-### Mount namespace
+### 2.2. Mount namespace
 
 上面对 PID ns 的操作中刚好提到了 Mount ns，我们趁热打铁，来看看 Mount ns 的操作吧。
 
@@ -280,3 +280,9 @@ jzd@master-58:~$ ls /proc
 
 太对啦！叔叔进程的 proc 文件系统没有被影响，Mount ns 真的起作用了。
 
+
+## 3. 总结
+
+在上面的实践中，我们能够很直观的了解到 namespace 的作用 —— **隔离**。通过 namespace，我们可以让不同的进程看到不同的系统资源，这样就可以实现进程之间的隔离。
+
+这就是容器看似独占所有资源，互相之间还互不影响的底层原理！
