@@ -195,7 +195,7 @@ echo "I am in upper" > upper/a.txt
 
 ![overlay目录层次结构图](./img/overlay目录层次图.png)
 
-我们在直观上看到的、操作的 `merged` 目录，实际上的数据来源和操作落地都发生在 `lowerdir` 和 `upperdir` 种，而 `lowerdir` 只在最开始时影响 `merged` 的初始化，之后便不会起任何作用。之后对 `merged` 的所有操作（例如修改了文件），会直接发生在到 `upperdir` 上。
+我们在直观上看到的、操作的 `merged` 目录，实际上的数据来源和操作落地都发生在 `lowerdir` 和 `upperdir` 中，而 `lowerdir` 只在最开始时影响 `merged` 的初始化，之后便不会起任何作用。之后对 `merged` 的所有操作（例如修改了文件），会直接发生在到 `upperdir` 上。
 
 我们继续进行其它操作来验证一下。
 
