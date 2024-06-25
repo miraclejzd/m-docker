@@ -12,4 +12,6 @@
 
 - [namespace](./basics/namespace/readme.md)
 
+- [cgroup](./basics/cgroup/readme.md)
+
 - [UnionFS](./basics/UnionFS/readme.md)
