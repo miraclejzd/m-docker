@@ -104,7 +104,14 @@ $ while : ; do : ; done &
 [1] 2637941
 ```
 
-这个流氓进程的 PID 是 `2637941`，我们如何把它放到 `inf` 节点呢？
+这个流氓进程的 PID 是 `2637941`，我们查看以下它当前的 cgroup 是哪个节点：
+
+```bash
+cat /proc/2637941/cgroup
+0::/user.slice/user-1002.slice/session-9102.scope
+```
+
+了然，它现在 `/sys/fs/cgroup/user.slice/user-1002.slice/session-9102.scope` 这个节点下，那我们如何把它放到 `inf` 节点呢？
 
 很简单，只需要把 pid 写入 `inf` 节点的 `cgroup.procs` 文件就可以了：
 
