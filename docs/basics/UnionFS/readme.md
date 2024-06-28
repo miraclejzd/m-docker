@@ -45,7 +45,7 @@ overlay 简单来讲可以概括为三点：
 
 ## 3. overlay 实操
 
-接下来实操的目录结构，可以参考 [/basics/UnionFS/src](./src/) 目录。
+接下来实操的目录结构，可以参考 [UnionFS/src](./src/) 目录。
 
 ### 3.1. 环境准备
 

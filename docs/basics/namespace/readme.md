@@ -88,7 +88,7 @@ jzd@master-58:~$ cat /proc/sys/user/max_pid_namespaces
 
 ## 2. Golang 操作 namespace 实操
 
-源代码可见 [这里](./src/main.go)。
+源代码可见 [namespace/src](./src/main.go)。
 
 ### 2.1. PID namespace
 

@@ -10,8 +10,8 @@
 
 ## 底层技术
 
-- [namespace](./basics/namespace/readme.md)
+- [namespace](./docs/basics/namespace/readme.md)
 
-- [cgroup](./basics/cgroup/readme.md)
+- [cgroup](./docs/basics/cgroup/readme.md)
 
-- [UnionFS](./basics/UnionFS/readme.md)
+- [UnionFS](./docs/basics/UnionFS/readme.md)
