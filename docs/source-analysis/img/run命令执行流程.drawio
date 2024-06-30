@@ -1,0 +1,128 @@
+<mxfile host="app.diagrams.net" modified="2024-06-30T15:27:19.507Z" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36 Edg/126.0.0.0" etag="MJPhgQAbVskPNuL9-V3f" version="24.6.3" type="device">
+  <diagram name="第 1 页" id="hFs0VX9_GphR7E8ITGiV">
+    <mxGraphModel dx="1556" dy="881" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="eluX7q4g4-1jKyoZXfWZ-4" value="m-docker命令行工具" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="204" y="90" width="120" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="eluX7q4g4-1jKyoZXfWZ-5" value="" style="endArrow=none;dashed=1;html=1;rounded=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" edge="1" parent="1" target="eluX7q4g4-1jKyoZXfWZ-4">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="264" y="530" as="sourcePoint" />
+            <mxPoint x="284" y="180" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="eluX7q4g4-1jKyoZXfWZ-7" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;fillColor=#dae8fc;strokeColor=#6c8ebf;" edge="1" parent="1" source="eluX7q4g4-1jKyoZXfWZ-6">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="264" y="240" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="eluX7q4g4-1jKyoZXfWZ-8" value="1. m-docker run" style="edgeLabel;html=1;align=center;verticalAlign=bottom;resizable=0;points=[];fontColor=#4D6589;" vertex="1" connectable="0" parent="eluX7q4g4-1jKyoZXfWZ-7">
+          <mxGeometry x="-0.1349" y="4" relative="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="eluX7q4g4-1jKyoZXfWZ-6" value="开始" style="ellipse;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="34" y="200" width="120" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="eluX7q4g4-1jKyoZXfWZ-9" value="run" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+          <mxGeometry x="354" y="90" width="120" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="eluX7q4g4-1jKyoZXfWZ-10" value="" style="endArrow=none;dashed=1;html=1;rounded=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="414" y="380" as="sourcePoint" />
+            <mxPoint x="413.5" y="130" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="eluX7q4g4-1jKyoZXfWZ-11" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;fillColor=#dae8fc;strokeColor=#6c8ebf;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="414" y="260" as="targetPoint" />
+            <mxPoint x="264" y="260" as="sourcePoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="eluX7q4g4-1jKyoZXfWZ-12" value="2. 解析参数，调用run函数" style="edgeLabel;html=1;align=center;verticalAlign=bottom;resizable=0;points=[];spacingRight=0;spacingLeft=17;fontColor=#4d6589;" vertex="1" connectable="0" parent="eluX7q4g4-1jKyoZXfWZ-11">
+          <mxGeometry x="-0.1349" y="4" relative="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="eluX7q4g4-1jKyoZXfWZ-14" value="NewContainerProcess" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+          <mxGeometry x="504" y="90" width="130" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="eluX7q4g4-1jKyoZXfWZ-17" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;fillColor=#dae8fc;strokeColor=#6c8ebf;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="567" y="290" as="targetPoint" />
+            <mxPoint x="414" y="290" as="sourcePoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="eluX7q4g4-1jKyoZXfWZ-18" value="3. 调用 NewContainerProcess&lt;div&gt;函数，创建容器进程的句柄，&lt;/div&gt;&lt;div&gt;其运行命令 m-docker init&lt;/div&gt;" style="edgeLabel;html=1;align=center;verticalAlign=bottom;resizable=0;points=[];spacingRight=0;spacingLeft=22;fontColor=#4D6589;" vertex="1" connectable="0" parent="eluX7q4g4-1jKyoZXfWZ-17">
+          <mxGeometry x="-0.1349" y="4" relative="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="eluX7q4g4-1jKyoZXfWZ-19" value="" style="endArrow=none;dashed=1;html=1;rounded=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="569" y="340" as="sourcePoint" />
+            <mxPoint x="568.5" y="130" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="eluX7q4g4-1jKyoZXfWZ-23" value="" style="endArrow=classic;html=1;rounded=0;verticalAlign=bottom;dashed=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="567" y="340" as="sourcePoint" />
+            <mxPoint x="414" y="340" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="eluX7q4g4-1jKyoZXfWZ-24" value="4. 返回容器进程的句柄" style="edgeLabel;html=1;align=center;verticalAlign=bottom;resizable=0;points=[];spacingLeft=20;fontColor=#4D6589;" vertex="1" connectable="0" parent="eluX7q4g4-1jKyoZXfWZ-23">
+          <mxGeometry x="0.152" relative="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="eluX7q4g4-1jKyoZXfWZ-25" value="" style="endArrow=classic;html=1;rounded=0;verticalAlign=bottom;fillColor=#ffe6cc;strokeColor=#d79b00;" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="415" y="380" as="sourcePoint" />
+            <mxPoint x="264" y="380" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="eluX7q4g4-1jKyoZXfWZ-26" value="5. 启动容器进程&lt;div&gt;运行 m-docker init&lt;/div&gt;" style="edgeLabel;html=1;align=center;verticalAlign=bottom;resizable=0;points=[];spacingLeft=20;fontColor=#996500;" vertex="1" connectable="0" parent="eluX7q4g4-1jKyoZXfWZ-25">
+          <mxGeometry x="0.152" relative="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="eluX7q4g4-1jKyoZXfWZ-29" value="initContainer" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;" vertex="1" parent="1">
+          <mxGeometry x="664" y="90" width="130" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="eluX7q4g4-1jKyoZXfWZ-30" value="" style="endArrow=none;dashed=1;html=1;rounded=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="729" y="530" as="sourcePoint" />
+            <mxPoint x="728.5" y="130" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="eluX7q4g4-1jKyoZXfWZ-31" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;fillColor=#ffe6cc;strokeColor=#d79b00;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="729" y="480" as="targetPoint" />
+            <mxPoint x="264" y="480" as="sourcePoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="eluX7q4g4-1jKyoZXfWZ-32" value="6. 初始化容器进程，挂载 proc 文件系统，之后将控制权交给用户制定的 command" style="edgeLabel;html=1;align=center;verticalAlign=bottom;resizable=0;points=[];spacingLeft=60;fontColor=#996500;" vertex="1" connectable="0" parent="eluX7q4g4-1jKyoZXfWZ-31">
+          <mxGeometry x="-0.1349" y="4" relative="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="eluX7q4g4-1jKyoZXfWZ-33" value="" style="endArrow=classic;html=1;rounded=0;verticalAlign=bottom;dashed=1;entryX=1;entryY=0.5;entryDx=0;entryDy=0;fillColor=#ffe6cc;strokeColor=#d79b00;" edge="1" parent="1" target="eluX7q4g4-1jKyoZXfWZ-35">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="727" y="530" as="sourcePoint" />
+            <mxPoint x="164" y="530" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="eluX7q4g4-1jKyoZXfWZ-34" value="7. 容器创建成功，并已开始运行" style="edgeLabel;html=1;align=center;verticalAlign=bottom;resizable=0;points=[];spacingLeft=100;fontColor=#996500;" vertex="1" connectable="0" parent="eluX7q4g4-1jKyoZXfWZ-33">
+          <mxGeometry x="0.152" relative="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="eluX7q4g4-1jKyoZXfWZ-35" value="结束" style="ellipse;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="34" y="490" width="120" height="80" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
