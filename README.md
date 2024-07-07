@@ -22,7 +22,10 @@
 
 构造一个简单的容器，具有最基本的 namespace 隔离。
 
-- [chapter1：实现 run 命令](./docs/source-analysis/chapter1-run命令实现.md)
+- [chapter1 - 实现 run 命令](./docs/source-analysis/chapter1-run命令实现.md)
   
   tag：**feat-run**
 
+- [chapter2 - 优化：匿名管道传递参数](./docs/source-analysis/chapter2-匿名管道传递参数.md)
+
+  tag：**perf-pipe**
