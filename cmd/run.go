@@ -3,6 +3,7 @@ package cmd
 import (
 	"m-docker/libcontainer"
 	"os"
+	"strings"
 
 	log "github.com/sirupsen/logrus"
 	"github.com/urfave/cli"
@@ -25,21 +26,22 @@ var RunCommand = cli.Command{
 	// 2. 获取 command
 	// 3. 调用 run 函数去创建和运行容器
 	Action: func(context *cli.Context) error {
-		var cmd string
+		var cmdArray []string
 		if context.NArg() < 1 {
-			// return fmt.Errorf("missing container command")
 			log.Warnf("missing container command, filling with '/bin/bash' ")
-			cmd = string("/bin/bash")
+			cmdArray = append(cmdArray, string("/bin/bash"))
 		} else {
-			cmd = context.Args().Get(0)
+			for _, arg := range context.Args() {
+				cmdArray = append(cmdArray, arg)
+			}
 		}
 		tty := context.Bool("it")
-		run(tty, cmd)
+		run(tty, cmdArray)
 		return nil
 	},
 }
 
-func run(tty bool, command string) {
+func run(tty bool, comArray []string) {
 	// 生成一个容器进程的句柄，它启动后会运行 m-docker init [command]
 	process, writePipe := libcontainer.NewContainerProcess(tty)
 	if process == nil {
@@ -52,14 +54,15 @@ func run(tty bool, command string) {
 		log.Errorf("Run process.Start() err: %v", err)
 	}
 	// 子进程创建之后再通过管道发送参数
-	sendInitCommand(command, writePipe)
+	sendInitCommand(comArray, writePipe)
 
 	_ = process.Wait()
 	os.Exit(-1)
 }
 
 // 通过匿名管道发送参数给子进程
-func sendInitCommand(command string, writePipe *os.File) {
+func sendInitCommand(comArray []string, writePipe *os.File) {
+	command := strings.Join(comArray, " ")
 	log.Infof("Send command to init: %s", command)
 	_, _ = writePipe.WriteString(command)
 	_ = writePipe.Close()
