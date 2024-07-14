@@ -14,4 +14,5 @@ type Controller interface {
 // 所有的 cgroup controller
 var Controllers = []Controller{
 	&CpuController{},
+	&MemoryController{},
 }
