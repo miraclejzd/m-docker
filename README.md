@@ -29,3 +29,7 @@
 - [chapter2 - 优化：匿名管道传递参数](./docs/source-analysis/chapter2-匿名管道传递参数.md)
 
   tag：**perf-pipe**
+
+- [chapter3 - 基于 cgroup 实现资源限制](./docs/source-analysis/chapter3-基于cgroup实现资源限制.md)
+  
+  tag：**feat-cgroup**
