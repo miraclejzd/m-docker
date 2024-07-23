@@ -67,6 +67,7 @@ func run(tty bool, comArray []string, resConf *resource.ResourceConfig) {
 	// 启动容器进程
 	if err := process.Start(); err != nil {
 		log.Errorf("Run process.Start() err: %v", err)
+		return
 	}
 
 	cgroupManager, err := cgroup.NewCgroupManager("m-docker.slice")

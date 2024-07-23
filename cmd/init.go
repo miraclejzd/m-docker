@@ -2,9 +2,11 @@ package cmd
 
 import (
 	"errors"
+	"fmt"
 	"io"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"strings"
 	"syscall"
 
@@ -32,8 +34,8 @@ var InitCommand = cli.Command{
 func initContainer() error {
 	log.Infof("Start func: initContainer")
 
-	// 挂载 proc 文件系统
-	mountProcFS()
+	// 挂载根文件系统
+	mountRootFS()
 
 	// 读取管道中的 command 参数
 	cmdArray := readPipeCommand()
@@ -59,16 +61,67 @@ func initContainer() error {
 	return nil
 }
 
-// 挂载 proc 文件系统
-func mountProcFS() {
-	// 实现 mount --make-rprivate /proc
-	// 使得容器内的 /proc 目录与宿主机的 /proc 目录隔离开来
-	flags := uintptr(syscall.MS_PRIVATE | syscall.MS_REC)
-	_ = syscall.Mount("none", "/proc", "none", flags, "")
+// 挂载根文件系统
+func mountRootFS() {
+	pwd, err := os.Getwd()
+	if err != nil {
+		log.Errorf("Get cwd error: %v", err)
+		return
+	}
+	log.Infof("Current working directory: %s", pwd)
+
+	// 实现 mount --make-rprivate /
+	// 使得容器内的根挂载点与宿主机的根挂载点隔离开来
+	_ = syscall.Mount("none", "/", "none", syscall.MS_PRIVATE|syscall.MS_REC, "")
+
+	err = pivotRoot(pwd)
+	if err != nil {
+		log.Errorf("pivotRoot error: %v", err)
+		return
+	}
 
 	// 通过 mount 挂载容器自己的 proc 文件系统
 	defaultMountFlags := syscall.MS_NOEXEC | syscall.MS_NOSUID | syscall.MS_NODEV
 	_ = syscall.Mount("proc", "/proc", "proc", uintptr(defaultMountFlags), "")
+
+	syscall.Mount("tmpfs", "/dev", "tmpfs", syscall.MS_NOSUID|syscall.MS_STRICTATIME, "mode=755")
+}
+
+// 调用 pivot_root 系统调用，将根文件系统设置为 newRoot
+// pivot_root 系统调用原型：
+// int pivot_root(const char *new_root, const char *put_old);
+func pivotRoot(newRoot string) error {
+	// pivot_root 系统调用要求 new_root 和 put_old 都是挂载点
+	// 考虑到 newRoot 可能并不是挂载点，因此使用 bind mount 将其转化为挂载点
+	if err := syscall.Mount(newRoot, newRoot, "bind", syscall.MS_BIND|syscall.MS_REC, ""); err != nil {
+		return fmt.Errorf("bind mount rootfs to itself error: %v", err)
+	}
+
+	// 创建 root/.put_old 目录，用于存放旧的 rootFS
+	putOld := filepath.Join(newRoot, ".put_old")
+	if err := os.Mkdir(putOld, 0700); err != nil {
+		return fmt.Errorf("create dir %s error: %v", putOld, err)
+	}
+
+	// 执行 pivot_root 系统调用
+	if err := syscall.PivotRoot(newRoot, putOld); err != nil {
+		return fmt.Errorf("syscall.PivotRoot(%s, %s) error: %v", newRoot, putOld, err)
+	}
+
+	// 切换到新的根目录
+	if err := os.Chdir("/"); err != nil {
+		return fmt.Errorf("change dir to / error: %v", err)
+	}
+
+	// umount 旧的 rootFS
+	// 由于切换了根目录，putOld 路径变成了 /.put_old
+	putOld = filepath.Join("/", ".put_old")
+	if err := syscall.Unmount(putOld, syscall.MNT_DETACH); err != nil {
+		return fmt.Errorf("umount old rootfs error: %v", err)
+	}
+
+	// 删除 putOld 临时目录
+	return os.Remove(putOld)
 }
 
 const readPipefdIndex = 3
