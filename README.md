@@ -33,3 +33,7 @@
 - [chapter3 - 基于 cgroup 实现资源限制](./docs/source-analysis/chapter3-基于cgroup实现资源限制.md)
   
   tag：**feat-cgroup**
+
+- [chapter4 - 使用 pivot_root 切换根文件系统](./docs/source-analysis/chapter4-使用pivot_root切换根文件系统.md)
+  
+  tag：**feat-rootfs**
