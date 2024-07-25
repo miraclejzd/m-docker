@@ -84,6 +84,8 @@ func mountRootFS() {
 	defaultMountFlags := syscall.MS_NOEXEC | syscall.MS_NOSUID | syscall.MS_NODEV
 	_ = syscall.Mount("proc", "/proc", "proc", uintptr(defaultMountFlags), "")
 
+	// 重新挂载 /dev 文件系统
+	// 若不挂载，会导致容器内部无法访问和使用许多设备，这可能导致系统无法正常工作
 	syscall.Mount("tmpfs", "/dev", "tmpfs", syscall.MS_NOSUID|syscall.MS_STRICTATIME, "mode=755")
 }
 
