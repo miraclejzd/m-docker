@@ -57,6 +57,12 @@ var RunCommand = cli.Command{
 }
 
 func run(tty bool, comArray []string, resConf *resource.ResourceConfig) {
+	// 构建 rootfs
+	if err := libcontainer.CreateRootfs(); err != nil {
+		log.Errorf("Create rootfs error: %v", err)
+		return
+	}
+
 	// 生成一个容器进程的句柄，它启动后会运行 m-docker init [command]
 	process, writePipe := libcontainer.NewContainerProcess(tty)
 	if process == nil {
@@ -71,8 +77,14 @@ func run(tty bool, comArray []string, resConf *resource.ResourceConfig) {
 	}
 
 	cgroupManager, err := cgroup.NewCgroupManager("m-docker.slice")
-	// 当前函数 return 后释放 cgroup
-	defer cgroupManager.Destroy()
+	// 当前进程结束后，释放资源
+	defer func() {
+		// 删除 rootfs
+		libcontainer.DeleteRootfs()
+
+		// 当前函数 return 后释放 cgroup
+		cgroupManager.Destroy()
+	}()
 	if err != nil {
 		log.Errorf("Create new cgroup manager fail: %v", err)
 		return

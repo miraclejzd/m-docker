@@ -36,8 +36,8 @@ func NewContainerProcess(tty bool) (*exec.Cmd, *os.File) {
 	// 将 readPipe 通过子进程的 cmd.ExtraFile 传递给子进程
 	cmd.ExtraFiles = []*os.File{readPipe}
 
-	// 设置容器进程的工作目录为已设置好的 busybox 目录
-	cmd.Dir = "/root/rootfs"
+	// 设置容器进程的工作目录为 UnionFS 联合挂载后所得到的 rootfs 目录
+	cmd.Dir = "/var/lib/m-docker/rootfs/default"
 
 	return cmd, writePipe
 }
