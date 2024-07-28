@@ -10,9 +10,10 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
+// m-docker 数据的根目录
 var rootPath = "/var/lib/m-docker"
 
-// 生成 Rootfs 目录
+// 创建容器的 rootfs 目录
 func CreateRootfs() error {
 	imagePath := path.Join(rootPath, "images", "ubuntu.tar")
 	imageLayerPath := path.Join(rootPath, "layers", "ubuntu")
@@ -29,7 +30,7 @@ func CreateRootfs() error {
 		return fmt.Errorf("fail to prepare overlay dir:  %v", err)
 	}
 
-	// 最后使用 overlay 将镜像层读写层叠加到 Rootfs 上
+	// 最后使用 overlay 将镜像层读写层叠加到 rootfs 上
 	if err := mountRootfs([]string{imageLayerPath}, rwLayerPath, rootfsPath); err != nil {
 		_ = os.RemoveAll(rwLayerPath)
 		return fmt.Errorf("fail to mount rootfs: %v", err)
@@ -102,7 +103,7 @@ func mountRootfs(lowerDir []string, rwLayerDir string, rootfs string) error {
 	return nil
 }
 
-// 当容器退出后，删除 rootfs 目录
+// 当容器退出后，删除 rootfs 相关的目录
 func DeleteRootfs() {
 	rwLayerPath := path.Join(rootPath, "layers", "default")
 	rootfsPath := path.Join(rootPath, "rootfs", "default")
