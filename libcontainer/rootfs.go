@@ -60,12 +60,13 @@ func unzipImageLayer(imagePath string, dest string) error {
 	return nil
 }
 
-// 创建 overlay 所需要的 upper 目录和 work 目录
+// 创建 overlay 所需要的目录
 func prepareOverlayDir(rwLayerPath string, rootfsPath string) error {
-	// 要创建的目录有 3 个
-	// rwLayerPath 本身
+	// 要创建的目录有 4 个
+	// rwLayerPath，upper 和 work 的父目录
 	// rwLayerPath/fs，作为 upper 目录
 	// rwLayerPath/work，作为 work 目录
+	// rootfsPath, 联合挂载点
 	dirs := []string{
 		rwLayerPath,
 		path.Join(rwLayerPath, "fs"),
@@ -107,7 +108,7 @@ func DeleteRootfs() {
 	rootfsPath := path.Join(rootPath, "rootfs", "default")
 
 	umountRootfs(rootfsPath)
-	deleteOverlayDir(rwLayerPath)
+	deleteOverlayDir(rwLayerPath, rootfsPath)
 }
 
 // 解除 overlay 挂载
@@ -115,9 +116,10 @@ func umountRootfs(mountPoint string) {
 	_ = exec.Command("umount", mountPoint).Run()
 }
 
-// 删除 overlay 所准备的 upper、work 目录
-func deleteOverlayDir(rootfsPath string) {
+// 删除 overlay 所准备的目录
+func deleteOverlayDir(rwLayerPath string, rootfsPath string) {
 	_ = os.RemoveAll(rootfsPath)
+	_ = os.RemoveAll(rwLayerPath)
 }
 
 // 判断路径目标是否存在

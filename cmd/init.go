@@ -95,9 +95,10 @@ func mountRootFS() {
 func pivotRoot(newRoot string) error {
 	// pivot_root 系统调用要求 new_root 和 put_old 都是挂载点
 	// 考虑到 newRoot 可能并不是挂载点，因此使用 bind mount 将其转化为挂载点
-	if err := syscall.Mount(newRoot, newRoot, "bind", syscall.MS_BIND|syscall.MS_REC, ""); err != nil {
-		return fmt.Errorf("bind mount rootfs to itself error: %v", err)
-	}
+	// 但是通过 overlay 挂载的方式，newRoot 已经是挂载点了，因此这里不需要再次挂载
+	// if err := syscall.Mount(newRoot, newRoot, "bind", syscall.MS_BIND|syscall.MS_REC, ""); err != nil {
+	// 	return fmt.Errorf("bind mount rootfs to itself error: %v", err)
+	// }
 
 	// 创建 root/.put_old 目录，用于存放旧的 rootFS
 	putOld := filepath.Join(newRoot, ".put_old")
