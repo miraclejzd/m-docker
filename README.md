@@ -37,3 +37,7 @@
 - [chapter4 - 使用 pivot_root 切换根文件系统](./docs/source-analysis/chapter4-使用pivot_root切换根文件系统.md)
   
   tag：**feat-rootfs**
+
+- [chapter5 - 基于 overlay 联合挂载根文件系统](./docs/source-analysis/chapter5-基于overlay联合挂载根文件系统.md)
+
+  tag: **feat-overlay**
