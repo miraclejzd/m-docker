@@ -4,6 +4,7 @@ import (
 	"m-docker/libcontainer"
 	"m-docker/libcontainer/cgroup"
 	"m-docker/libcontainer/cgroup/resource"
+	"m-docker/libcontainer/config"
 	"os"
 	"strings"
 
@@ -29,6 +30,10 @@ var RunCommand = cli.Command{
 			Name:  "cpu", // CPU 使用率限制
 			Usage: "cpu limit.    eg: -cpu 0.5",
 		},
+		cli.StringFlag{
+			Name:  "name", // 容器名称
+			Usage: "container name.	eg: -name my-ubuntu-env",
+		},
 	},
 
 	// m-docker run 命令的入口点
@@ -36,27 +41,20 @@ var RunCommand = cli.Command{
 	// 2. 获取 command
 	// 3. 调用 run 函数去创建和运行容器
 	Action: func(context *cli.Context) error {
-		var cmdArray []string
-		if context.NArg() < 1 {
-			log.Warnf("missing container command, filling with '/bin/bash' ")
-			cmdArray = append(cmdArray, string("/bin/bash"))
-		} else {
-			for _, arg := range context.Args() {
-				cmdArray = append(cmdArray, arg)
-			}
-		}
+		// 生成容器的配置信息
+		config := config.CreateConfig(context)
 
-		tty := context.Bool("it")
 		resConf := &resource.ResourceConfig{
 			MemoryLimit: context.String("mem"),
 			CpuLimit:    context.Float64("cpu"),
 		}
-		run(tty, cmdArray, resConf)
+
+		run(config, resConf)
 		return nil
 	},
 }
 
-func run(tty bool, comArray []string, resConf *resource.ResourceConfig) {
+func run(config *config.Config, resConf *resource.ResourceConfig) {
 	// 构建 rootfs
 	if err := libcontainer.CreateRootfs(); err != nil {
 		log.Errorf("Create rootfs error: %v", err)
@@ -64,7 +62,7 @@ func run(tty bool, comArray []string, resConf *resource.ResourceConfig) {
 	}
 
 	// 生成一个容器进程的句柄，它启动后会运行 m-docker init [command]
-	process, writePipe := libcontainer.NewContainerProcess(tty)
+	process, writePipe := libcontainer.NewContainerProcess(config.TTY)
 	if process == nil {
 		log.Errorf("New process error!")
 		return
@@ -103,7 +101,7 @@ func run(tty bool, comArray []string, resConf *resource.ResourceConfig) {
 	cgroupManager.Set(resConf)
 
 	// 子进程创建之后再通过管道发送参数
-	sendInitCommand(comArray, writePipe)
+	sendInitCommand(config.CmdArray, writePipe)
 
 	_ = process.Wait()
 }
