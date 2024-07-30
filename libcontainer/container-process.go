@@ -1,6 +1,7 @@
 package libcontainer
 
 import (
+	"m-docker/libcontainer/config"
 	"os"
 	"os/exec"
 	"syscall"
@@ -10,7 +11,7 @@ import (
 
 // 生成一个容器进程的句柄
 // 该容器进程将运行 m-docker init ，并拥有新的 UTS、PID、Mount、NET、IPC namespace
-func NewContainerProcess(tty bool) (*exec.Cmd, *os.File) {
+func NewContainerProcess(conf *config.Config) (*exec.Cmd, *os.File) {
 	// 创建一个匿名管道用于传递参数，readPipe 和 writePipe 分别传递给子进程和父进程
 	readPipe, writePipe, err := os.Pipe()
 	if err != nil {
@@ -28,7 +29,7 @@ func NewContainerProcess(tty bool) (*exec.Cmd, *os.File) {
 	}
 
 	// 如果用户指定了 -it 参数，就需要把容器进程的输入输出导入到标准输入输出上
-	if tty {
+	if conf.TTY {
 		cmd.Stdin = os.Stdin
 		cmd.Stdout = os.Stdout
 		cmd.Stderr = os.Stderr
@@ -37,7 +38,7 @@ func NewContainerProcess(tty bool) (*exec.Cmd, *os.File) {
 	cmd.ExtraFiles = []*os.File{readPipe}
 
 	// 设置容器进程的工作目录为 UnionFS 联合挂载后所得到的 rootfs 目录
-	cmd.Dir = "/var/lib/m-docker/rootfs/default"
+	cmd.Dir = conf.Rootfs
 
 	return cmd, writePipe
 }

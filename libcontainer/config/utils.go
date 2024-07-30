@@ -2,7 +2,9 @@ package config
 
 import (
 	"crypto/sha256"
+	"encoding/json"
 	"fmt"
+	"os"
 	"path"
 	"time"
 
@@ -17,6 +19,15 @@ const (
 
 	// cgroup 根目录
 	cgroupRootPath = "/sys/fs/cgroup/m-docker.slice"
+
+	// m-docker 数据的根目录
+	rootPath = "/var/lib/m-docker"
+
+	// m-docker 状态信息的根目录
+	statePath = "/run/m-docker"
+
+	// 容器 Config 文件名
+	configName = "config.json"
 )
 
 // 生成容器的 Config 配置
@@ -48,6 +59,9 @@ func CreateConfig(ctx *cli.Context) *Config {
 	return &Config{
 		ID:          containerID,
 		Name:        containerName,
+		Rootfs:      path.Join(rootPath, "rootfs", containerID),
+		RwLayer:     path.Join(rootPath, "layers", containerID),
+		StateDir:    path.Join(statePath, containerID),
 		TTY:         ctx.Bool("it"),
 		CmdArray:    cmdArray,
 		Cgroup:      createCgroupConfig(ctx, containerID),
@@ -119,4 +133,39 @@ func createCgroupResource(ctx *cli.Context) *Resources {
 		CpuPeriod: defaultCPUPeriod,
 		CpuQuota:  cpuQuota,
 	}
+}
+
+// 将容器的 Config 持久化存储到磁盘上
+func RecordContainerConfig(conf *Config) error {
+	// 创建容器的状态信息目录
+	if err := os.MkdirAll(conf.StateDir, 0777); err != nil {
+		return fmt.Errorf("failed to create container state dir:  %v", err)
+	}
+
+	// 将容器 Config 写入文件
+	jsonBytes, err := json.Marshal(conf)
+	if err != nil {
+		return fmt.Errorf("failed to marshal container config:  %v", err)
+	}
+	jsonStr := string(jsonBytes)
+	filePath := path.Join(conf.StateDir, configName)
+	file, err := os.Create(filePath)
+	defer func() {
+		if err := file.Close(); err != nil {
+			log.Errorf("failed to close file %v:  %v", filePath, err)
+		}
+	}()
+	if err != nil {
+		return fmt.Errorf("failed to create file %s:  %v", filePath, err)
+	}
+	if _, err = file.WriteString(jsonStr); err != nil {
+		return fmt.Errorf("failed to write container config to file %s:  %v", filePath, err)
+	}
+
+	return nil
+}
+
+// 删除容器的状态信息
+func DeleteContainerState(conf *Config) {
+	os.RemoveAll(conf.StateDir)
 }

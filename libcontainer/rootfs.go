@@ -2,6 +2,7 @@ package libcontainer
 
 import (
 	"fmt"
+	"m-docker/libcontainer/config"
 	"os"
 	"os/exec"
 	"path"
@@ -14,11 +15,9 @@ import (
 var rootPath = "/var/lib/m-docker"
 
 // 创建容器的 rootfs 目录
-func CreateRootfs() error {
+func CreateRootfs(conf *config.Config) error {
 	imagePath := path.Join(rootPath, "images", "ubuntu.tar")
 	imageLayerPath := path.Join(rootPath, "layers", "ubuntu")
-	rwLayerPath := path.Join(rootPath, "layers", "default")
-	rootfsPath := path.Join(rootPath, "rootfs", "default")
 
 	// 首先解压镜像
 	if err := unzipImageLayer(imagePath, imageLayerPath); err != nil {
@@ -26,13 +25,13 @@ func CreateRootfs() error {
 	}
 
 	// 之后准备 overlay 所需要的目录
-	if err := prepareOverlayDir(rwLayerPath, rootfsPath); err != nil {
+	if err := prepareOverlayDir(conf.RwLayer, conf.Rootfs); err != nil {
 		return fmt.Errorf("fail to prepare overlay dir:  %v", err)
 	}
 
 	// 最后使用 overlay 将镜像层读写层叠加到 rootfs 上
-	if err := mountRootfs([]string{imageLayerPath}, rwLayerPath, rootfsPath); err != nil {
-		_ = os.RemoveAll(rwLayerPath)
+	if err := mountRootfs([]string{imageLayerPath}, conf.RwLayer, conf.Rootfs); err != nil {
+		_ = os.RemoveAll(conf.RwLayer)
 		return fmt.Errorf("fail to mount rootfs: %v", err)
 	}
 
@@ -104,12 +103,9 @@ func mountRootfs(lowerDir []string, rwLayerDir string, rootfs string) error {
 }
 
 // 当容器退出后，删除 rootfs 相关的目录
-func DeleteRootfs() {
-	rwLayerPath := path.Join(rootPath, "layers", "default")
-	rootfsPath := path.Join(rootPath, "rootfs", "default")
-
-	umountRootfs(rootfsPath)
-	deleteOverlayDir(rwLayerPath, rootfsPath)
+func DeleteRootfs(conf *config.Config) {
+	umountRootfs(conf.Rootfs)
+	deleteOverlayDir(conf.RwLayer, conf.Rootfs)
 }
 
 // 解除 overlay 挂载

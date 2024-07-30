@@ -14,6 +14,15 @@ type Config struct {
 	// 容器名称
 	Name string `json:"name"`
 
+	// 容器的 rootfs 路径
+	Rootfs string `json:"rootfs"`
+
+	// 容器的读写层路径
+	RwLayer string `json:"rwLayer"`
+
+	// 容器的状态信息路径
+	StateDir string `json:"stateDir"`
+
 	// 容器是否启用 tty
 	TTY bool `json:"tty"`
 
