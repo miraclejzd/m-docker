@@ -3,7 +3,6 @@ package cmd
 import (
 	"m-docker/libcontainer"
 	"m-docker/libcontainer/cgroup"
-	"m-docker/libcontainer/cgroup/resource"
 	"m-docker/libcontainer/config"
 	"os"
 	"strings"
@@ -44,17 +43,12 @@ var RunCommand = cli.Command{
 		// 生成容器的配置信息
 		config := config.CreateConfig(context)
 
-		resConf := &resource.ResourceConfig{
-			MemoryLimit: context.String("mem"),
-			CpuLimit:    context.Float64("cpu"),
-		}
-
-		run(config, resConf)
+		run(config)
 		return nil
 	},
 }
 
-func run(config *config.Config, resConf *resource.ResourceConfig) {
+func run(config *config.Config) {
 	// 构建 rootfs
 	if err := libcontainer.CreateRootfs(); err != nil {
 		log.Errorf("Create rootfs error: %v", err)
@@ -74,7 +68,7 @@ func run(config *config.Config, resConf *resource.ResourceConfig) {
 		return
 	}
 
-	cgroupManager, err := cgroup.NewCgroupManager("m-docker.slice")
+	cgroupManager, err := cgroup.NewCgroupManager(config.Cgroup.Path)
 	// 当前进程结束后，释放资源
 	defer func() {
 		// 删除 rootfs
@@ -98,7 +92,7 @@ func run(config *config.Config, resConf *resource.ResourceConfig) {
 		return
 	}
 	// 设置 cgroup 的资源限制
-	cgroupManager.Set(resConf)
+	cgroupManager.Set(config.Cgroup.Resources)
 
 	// 子进程创建之后再通过管道发送参数
 	sendInitCommand(config.CmdArray, writePipe)

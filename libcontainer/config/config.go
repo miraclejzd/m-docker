@@ -20,6 +20,9 @@ type Config struct {
 	// 容器的运行命令
 	CmdArray []string `json:"CmdArray"`
 
+	// 容器的 Cgroup 配置
+	Cgroup *Cgroup `json:"cgroup"`
+
 	// 容器的创建时间
 	CreatedTime string `json:"createdTime"`
 }

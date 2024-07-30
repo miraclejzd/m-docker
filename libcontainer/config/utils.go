@@ -3,11 +3,20 @@ package config
 import (
 	"crypto/sha256"
 	"fmt"
+	"path"
 	"time"
 
 	log "github.com/sirupsen/logrus"
 	"github.com/urfave/cli"
 	"golang.org/x/exp/rand"
+)
+
+const (
+	// 默认 CPU 硬限制调度周期为 100000us
+	defaultCPUPeriod = 100000
+
+	// cgroup 根目录
+	cgroupRootPath = "/sys/fs/cgroup/m-docker.slice"
 )
 
 // 生成容器的 Config 配置
@@ -16,10 +25,9 @@ func CreateConfig(ctx *cli.Context) *Config {
 	createdTime := time.Now().Format("2024-07-30 00:28:58")
 
 	// 从命令行参数中获取容器名称
-	var containerName string
-	if ctx.String("name") != "" {
-		containerName = ctx.String("name")
-	} else { // 如果没有指定容器名称，则默认为
+	containerName := ctx.String("name")
+	// 如果没有设置容器名称，则生成一个随机名称
+	if containerName == "" {
 		containerName = generateContainerName()
 	}
 
@@ -37,14 +45,12 @@ func CreateConfig(ctx *cli.Context) *Config {
 		}
 	}
 
-	// 获取容器是否启用 tty
-	tty := ctx.Bool("it")
-
 	return &Config{
 		ID:          containerID,
 		Name:        containerName,
-		TTY:         tty,
+		TTY:         ctx.Bool("it"),
 		CmdArray:    cmdArray,
+		Cgroup:      createCgroupConfig(ctx, containerID),
 		CreatedTime: createdTime,
 	}
 }
@@ -78,4 +84,39 @@ func generateContainerName() string {
 	adj := adjectives[rand.Intn(len(adjectives))]
 	noun := nouns[rand.Intn(len(nouns))]
 	return fmt.Sprintf("%s_%s", adj, noun)
+}
+
+// 生成 cgroup 配置
+func createCgroupConfig(ctx *cli.Context, containerID string) *Cgroup {
+	name := "m-docker-" + containerID
+
+	return &Cgroup{
+		Name:      name,
+		Path:      path.Join(cgroupRootPath, name+".scope"),
+		Resources: createCgroupResource(ctx),
+	}
+}
+
+// 生成 cgroup 资源配置
+func createCgroupResource(ctx *cli.Context) *Resources {
+	// 内存限制
+	memory := ctx.String("mem")
+	if memory == "" {
+		memory = "max"
+	}
+
+	// cpu 使用率限制
+	var cpuQuota uint64
+	cpuPercent := ctx.Float64("cpu")
+	if cpuPercent == 0 {
+		cpuQuota = 0
+	} else {
+		cpuQuota = uint64(cpuPercent * defaultCPUPeriod)
+	}
+
+	return &Resources{
+		Memory:    memory,
+		CpuPeriod: defaultCPUPeriod,
+		CpuQuota:  cpuQuota,
+	}
 }

@@ -1,6 +1,6 @@
 package v2
 
-import "m-docker/libcontainer/cgroup/resource"
+import "m-docker/libcontainer/config"
 
 // cgroup controller 的抽象接口
 type Controller interface {
@@ -8,7 +8,7 @@ type Controller interface {
 	Name() string
 
 	// Set() 方法用于设置当前 cgroup controller ontroller 的资源限制
-	Set(cgroupPath string, resConf *resource.ResourceConfig) error
+	Set(cgroupPath string, resConf *config.Resources) error
 }
 
 // 所有的 cgroup controller

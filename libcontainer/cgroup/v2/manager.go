@@ -2,7 +2,7 @@ package v2
 
 import (
 	"fmt"
-	"m-docker/libcontainer/cgroup/resource"
+	"m-docker/libcontainer/config"
 	"os"
 	"path"
 	"strconv"
@@ -13,7 +13,7 @@ import (
 
 type CgroupV2Manager struct {
 	dirPath     string
-	resource    *resource.ResourceConfig
+	resource    *config.Resources
 	controllers []Controller
 }
 
@@ -52,7 +52,7 @@ func (c *CgroupV2Manager) Apply(pid int) error {
 	return nil
 }
 
-func (c *CgroupV2Manager) Set(resConf *resource.ResourceConfig) {
+func (c *CgroupV2Manager) Set(resConf *config.Resources) {
 	c.resource = resConf
 	// 遍历所有的 cgroup controller，调用 controller 的 Set 方法来设置 cgroup 的资源限制
 	for _, controller := range c.controllers {

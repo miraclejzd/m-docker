@@ -2,14 +2,14 @@ package cgroup
 
 import (
 	"fmt"
-	"m-docker/libcontainer/cgroup/resource"
 	v2 "m-docker/libcontainer/cgroup/v2"
+	"m-docker/libcontainer/config"
 
 	log "github.com/sirupsen/logrus"
 )
 
-// Cgroup 是 cgroup 的抽象接口
-type Cgroup interface {
+// CgroupManager 是 cgroup 的抽象接口
+type CgroupManager interface {
 	// 初始化 cgroup，创建 cgroup 目录
 	Init() error
 
@@ -17,14 +17,14 @@ type Cgroup interface {
 	Apply(pid int) error
 
 	// 设置 cgroup 的资源限制
-	Set(res *resource.ResourceConfig)
+	Set(res *config.Resources)
 
 	// 销毁 cgroup
 	Destroy()
 }
 
 // 根据 cgroup 版本创建 CgroupManager
-func NewCgroupManager(dirPath string) (Cgroup, error) {
+func NewCgroupManager(dirPath string) (CgroupManager, error) {
 	// 如果支持 cgroup v2，则使用 cgroup v2
 	if IsCgroup2UnifiedMode() {
 		log.Infof("using cgroup v2")
