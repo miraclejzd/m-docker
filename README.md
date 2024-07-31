@@ -41,3 +41,9 @@
 - [chapter5 - 基于 overlay 联合挂载根文件系统](./docs/source-analysis/chapter5-基于overlay联合挂载根文件系统.md)
 
   tag: **feat-overlay**
+
+### 2. 容器进阶
+
+- [chapter6 - 重构！添加容器 Config](./docs/source-analysis/chpater6-重构！添加容器Config.md)
+  
+  tag: **refactor-config**
