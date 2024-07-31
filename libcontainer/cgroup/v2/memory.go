@@ -22,6 +22,6 @@ func (s *MemoryController) Set(cgroupPath string, resConf *config.Resources) err
 		return fmt.Errorf("os.WriteFile() to file %v fail:  %v", path.Join(cgroupPath, "memory.max"), err)
 	}
 
-	log.Infof("Set cgroup memory.max: %v", resConf.Memory)
+	log.Debugf("Set cgroup memory.max: %v", resConf.Memory)
 	return nil
 }

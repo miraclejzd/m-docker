@@ -94,7 +94,7 @@ func mountRootfs(lowerDir []string, rwLayerDir string, rootfs string) error {
 
 	// 完整命令：mount -t overlay m-docker-overlay lowerdir=xxx,upperdir=xxx,workdir=xxx xxx
 	cmd := exec.Command("mount", "-t", "overlay", "m-docker-overlay", "-o", overlayArgs, rootfs)
-	log.Infof("Mount overlay command: %v", cmd.String())
+	log.Debugf("Mount overlay command: %v", cmd.String())
 	if err := cmd.Run(); err != nil {
 		return fmt.Errorf("fail to overlay mount: %v", err)
 	}

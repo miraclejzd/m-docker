@@ -29,9 +29,21 @@ func main() {
 		cmd.RunCommand,
 		cmd.InitCommand,
 	}
+	// 全局 flag
+	app.Flags = []cli.Flag{
+		cli.BoolFlag{
+			Name:  "debug", // 启用 debug 模式
+			Usage: "enable debug mode",
+		},
+	}
 	app.Before = func(context *cli.Context) error {
 		// 设置日志格式为 json
 		log.SetFormatter(&log.JSONFormatter{})
+
+		// 设置日志级别
+		if context.Bool("debug") {
+			log.SetLevel(log.DebugLevel)
+		}
 
 		log.SetOutput(os.Stdout)
 		return nil

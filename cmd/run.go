@@ -114,7 +114,7 @@ func run(conf *config.Config) {
 // 通过匿名管道发送参数给子进程
 func sendInitCommand(comArray []string, writePipe *os.File) {
 	command := strings.Join(comArray, " ")
-	log.Infof("Send command to init: %s", command)
+	log.Debugf("Send command to init: %s", command)
 	_, _ = writePipe.WriteString(command)
 	_ = writePipe.Close()
 }

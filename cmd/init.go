@@ -23,7 +23,7 @@ var InitCommand = cli.Command{
 	// 1. 获取传递来的 command 参数
 	// 2. 在容器中进行初始化
 	Action: func(context *cli.Context) error {
-		log.Infof("--- Inside the container ---")
+		log.Debugf("--- Inside the container ---")
 		err := initContainer()
 		return err
 	},
@@ -32,7 +32,7 @@ var InitCommand = cli.Command{
 // 在容器中进行初始化
 // 执行到这里的时候容器已经被创建，所以这个函数是在容器内部执行的
 func initContainer() error {
-	log.Infof("Start func: initContainer")
+	log.Debugf("Start func: initContainer")
 
 	// 挂载根文件系统
 	mountRootFS()
@@ -49,7 +49,7 @@ func initContainer() error {
 		log.Errorf("exec.LookPath error: %v", err)
 		return err
 	}
-	log.Infof("find command path: %s", path)
+	log.Debugf("find command path: %s", path)
 
 	// syscall.Exec 会调用 execve 系统调用，它会用新的程序段替换当前进程的程序段
 	// 成功执行这个系统调用后，当前 initContainer 函数剩余的程序段将不会继续运行，而是被用户定义的 command 替换
@@ -68,7 +68,7 @@ func mountRootFS() {
 		log.Errorf("Get cwd error: %v", err)
 		return
 	}
-	log.Infof("Current working directory: %s", pwd)
+	log.Debugf("Current working directory: %s", pwd)
 
 	// 实现 mount --make-rprivate /
 	// 使得容器内的根挂载点与宿主机的根挂载点隔离开来

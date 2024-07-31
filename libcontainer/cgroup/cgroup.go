@@ -27,7 +27,7 @@ type CgroupManager interface {
 func NewCgroupManager(dirPath string) (CgroupManager, error) {
 	// 如果支持 cgroup v2，则使用 cgroup v2
 	if IsCgroup2UnifiedMode() {
-		log.Infof("using cgroup v2")
+		log.Debugf("using cgroup v2")
 		return v2.NewCgroupV2Manager(dirPath), nil
 	}
 	// 目前不考虑支持 cgroup v1，因此直接返回错误

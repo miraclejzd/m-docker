@@ -30,6 +30,6 @@ func (s *CpuController) Set(cgroupPath string, resConf *config.Resources) error 
 		return fmt.Errorf("os.WriteFile() to file %v fail:  %v", path.Join(cgroupPath, "cpu.max"), err)
 	}
 
-	log.Infof("Set cgroup cpu.max: %v", cpuLimit)
+	log.Debugf("Set cgroup cpu.max: %v", cpuLimit)
 	return nil
 }
