@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"os"
 	"path"
+	"strings"
 	"time"
 
 	log "github.com/sirupsen/logrus"
@@ -31,7 +32,7 @@ const (
 )
 
 // 生成容器的 Config 配置
-func CreateConfig(ctx *cli.Context) *Config {
+func CreateConfig(ctx *cli.Context) (*Config, error) {
 	// 容器创建时间
 	createdTime := time.Now().Format("2024-07-30 00:28:58")
 
@@ -44,6 +45,12 @@ func CreateConfig(ctx *cli.Context) *Config {
 
 	// 生成容器ID
 	containerID := generateContainerID(containerName + createdTime)
+
+	// 获取容器的 volume 挂载信息
+	mounts, err := extractVolumeMounts(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("failed to extract volume mounts: %v", err)
+	}
 
 	// 获取容器的运行命令
 	var cmdArray []string
@@ -62,11 +69,12 @@ func CreateConfig(ctx *cli.Context) *Config {
 		Rootfs:      path.Join(rootPath, "rootfs", containerID),
 		RwLayer:     path.Join(rootPath, "layers", containerID),
 		StateDir:    path.Join(statePath, containerID),
+		Mounts:      mounts,
 		TTY:         ctx.Bool("it"),
 		CmdArray:    cmdArray,
 		Cgroup:      createCgroupConfig(ctx, containerID),
 		CreatedTime: createdTime,
-	}
+	}, nil
 }
 
 // 生成容器ID
@@ -98,6 +106,31 @@ func generateContainerName() string {
 	adj := adjectives[rand.Intn(len(adjectives))]
 	noun := nouns[rand.Intn(len(nouns))]
 	return fmt.Sprintf("%s_%s", adj, noun)
+}
+
+// 解析挂载目录
+func extractVolumeMounts(ctx *cli.Context) ([]*Mount, error) {
+	var mounts []*Mount
+
+	volumes := ctx.StringSlice("v")
+	for _, volume := range volumes {
+		volumeArray := strings.Split(volume, ":")
+		if len(volumeArray) != 2 {
+			return nil, fmt.Errorf("invalid volume: [%v], must split by ':'", volume)
+		}
+
+		src, dest := volumeArray[0], volumeArray[1]
+		if src == "" || dest == "" {
+			return nil, fmt.Errorf("invalid volume: [%v], path can not be empty", volume)
+		}
+
+		mounts = append(mounts, &Mount{
+			Source:      src,
+			Destination: dest,
+		})
+	}
+
+	return mounts, nil
 }
 
 // 生成 cgroup 配置

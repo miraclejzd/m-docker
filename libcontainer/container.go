@@ -31,6 +31,11 @@ func (c *Container) Create() error {
 		return fmt.Errorf("failed to create rootfs: %v", err)
 	}
 
+	// 挂载 volume
+	if err := MountVolumes(c.Config); err != nil {
+		return fmt.Errorf("failed to mount volumes: %v", err)
+	}
+
 	// 创建 cgroup Manager
 	cgroupManager, err := cgroup.NewCgroupManager(c.Config.Cgroup.Path)
 	if err != nil {
@@ -82,14 +87,17 @@ func (c *Container) Start() error {
 
 // 清理容器数据
 func (c *Container) Remove() {
-	// 删除 rootfs
-	DeleteRootfs(c.Config)
+	// 删除容器的状态信息
+	config.DeleteContainerState(c.Config)
 
 	// 释放 cgroup
 	c.CgroupManager.Destroy()
 
-	// 删除容器的状态信息
-	config.DeleteContainerState(c.Config)
+	// 卸载 volume
+	UmountVolumes(c.Config)
+
+	// 删除 rootfs
+	DeleteRootfs(c.Config)
 }
 
 // 生成一个容器进程的句柄

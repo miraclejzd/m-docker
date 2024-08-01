@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"fmt"
 	"m-docker/libcontainer"
 	"m-docker/libcontainer/config"
 
@@ -20,15 +21,19 @@ var RunCommand = cli.Command{
 		},
 		cli.StringFlag{
 			Name:  "mem", // 内存限制
-			Usage: "memory limit.   eg: -mem 100m",
+			Usage: "memory limit.	eg: -mem 100m",
 		},
 		cli.StringFlag{
 			Name:  "cpu", // CPU 使用率限制
-			Usage: "cpu limit.    eg: -cpu 0.5",
+			Usage: "cpu limit.	eg: -cpu 0.5",
 		},
 		cli.StringFlag{
 			Name:  "name", // 容器名称
 			Usage: "container name.	eg: -name my-ubuntu-env",
+		},
+		cli.StringSliceFlag{
+			Name:  "v", // 挂载目录
+			Usage: "bind mount a volume.	eg: -v /host:/container",
 		},
 	},
 
@@ -38,7 +43,10 @@ var RunCommand = cli.Command{
 	// 3. 调用 run 函数去创建和运行容器
 	Action: func(context *cli.Context) error {
 		// 生成容器的配置信息
-		conf := config.CreateConfig(context)
+		conf, err := config.CreateConfig(context)
+		if err != nil {
+			return fmt.Errorf("create config error: %v", err)
+		}
 
 		run(conf)
 

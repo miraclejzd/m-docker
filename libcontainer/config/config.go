@@ -23,6 +23,9 @@ type Config struct {
 	// 容器的状态信息路径
 	StateDir string `json:"stateDir"`
 
+	// 容器与宿主机的挂载
+	Mounts []*Mount `json:"mounts"`
+
 	// 容器是否启用 tty
 	TTY bool `json:"tty"`
 
