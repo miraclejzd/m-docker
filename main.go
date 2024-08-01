@@ -37,9 +37,11 @@ func main() {
 		},
 	}
 	app.Before = func(context *cli.Context) error {
-		// 设置日志格式为 json
-		log.SetFormatter(&log.JSONFormatter{})
-
+		// 设置日志格式
+		log.SetFormatter(&log.TextFormatter{
+			ForceColors:   true,
+			FullTimestamp: true,
+		})
 		// 设置日志级别
 		if context.Bool("debug") {
 			log.SetLevel(log.DebugLevel)
