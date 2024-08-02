@@ -31,7 +31,6 @@ func CreateRootfs(conf *config.Config) error {
 
 	// 最后使用 overlay 将镜像层读写层叠加到 rootfs 上
 	if err := mountRootfs([]string{imageLayerPath}, conf.RwLayer, conf.Rootfs); err != nil {
-		_ = os.RemoveAll(conf.RwLayer)
 		return fmt.Errorf("fail to mount rootfs: %v", err)
 	}
 
@@ -76,7 +75,6 @@ func prepareOverlayDir(rwLayerPath string, rootfsPath string) error {
 
 	for _, dir := range dirs {
 		if err := os.Mkdir(dir, 0755); err != nil {
-			_ = os.RemoveAll(rwLayerPath)
 			return fmt.Errorf("fail to create dir %s: %v", dir, err)
 		}
 	}

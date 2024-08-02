@@ -2,10 +2,7 @@ package cmd
 
 import (
 	"m-docker/libcontainer"
-	"m-docker/libcontainer/cgroup"
 	"m-docker/libcontainer/config"
-	"os"
-	"strings"
 
 	log "github.com/sirupsen/logrus"
 	"github.com/urfave/cli"
@@ -50,71 +47,20 @@ var RunCommand = cli.Command{
 }
 
 func run(conf *config.Config) {
-	// 构建 rootfs
-	if err := libcontainer.CreateRootfs(conf); err != nil {
-		log.Errorf("Create rootfs error: %v", err)
+	// 创建容器对象
+	container := libcontainer.NewContainer(conf)
+	// 函数结束后释放容器资源
+	defer container.Remove()
+
+	// 创建容器运行环境
+	if err := container.Create(); err != nil {
+		log.Errorf("Create container error: %v", err)
 		return
 	}
 
-	// 生成一个容器进程的句柄，它启动后会运行 m-docker init [command]
-	process, writePipe := libcontainer.NewContainerProcess(conf)
-	if process == nil {
-		log.Errorf("New process error!")
+	// 启动容器
+	if err := container.Start(); err != nil {
+		log.Errorf("Start container error: %v", err)
 		return
 	}
-
-	// 启动容器进程
-	if err := process.Start(); err != nil {
-		log.Errorf("Run process.Start() err: %v", err)
-		return
-	}
-
-	conf.Pid = process.Process.Pid
-	// 将容器的配置信息持久化到磁盘上
-	if err := config.RecordContainerConfig(conf); err != nil {
-		log.Errorf("Record container config error: %v", err)
-		return
-	}
-
-	cgroupManager, err := cgroup.NewCgroupManager(conf.Cgroup.Path)
-	// 当前进程结束后，释放资源
-	defer func() {
-		// 删除 rootfs
-		libcontainer.DeleteRootfs(conf)
-
-		// 当前函数 return 后释放 cgroup
-		cgroupManager.Destroy()
-
-		// 删除容器的状态信息
-		config.DeleteContainerState(conf)
-	}()
-	if err != nil {
-		log.Errorf("Create new cgroup manager fail: %v", err)
-		return
-	}
-	// 初始化 cgroup
-	if err = cgroupManager.Init(); err != nil {
-		log.Errorf("Init cgroup fail: %v", err)
-		return
-	}
-	// 将子进程加入到 cgroup 中
-	if err = cgroupManager.Apply(conf.Pid); err != nil {
-		log.Errorf("Apply process %v to cgroup fail: %v", conf.Pid, err)
-		return
-	}
-	// 设置 cgroup 的资源限制
-	cgroupManager.Set(conf.Cgroup.Resources)
-
-	// 子进程创建之后再通过管道发送参数
-	sendInitCommand(conf.CmdArray, writePipe)
-
-	_ = process.Wait()
-}
-
-// 通过匿名管道发送参数给子进程
-func sendInitCommand(comArray []string, writePipe *os.File) {
-	command := strings.Join(comArray, " ")
-	log.Debugf("Send command to init: %s", command)
-	_, _ = writePipe.WriteString(command)
-	_ = writePipe.Close()
 }
