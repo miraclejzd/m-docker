@@ -47,3 +47,7 @@
 - [chapter6 - 重构！添加容器 Config](./docs/source-analysis/chpater6-重构！添加容器Config.md)
   
   tag: **refactor-config**
+
+- [chapter7 - 重构！添加容器生命周期](./docs/source-analysis/chapter7-重构！添加容器生命周期.md)
+
+  tag: **refactor-lifecycle**
