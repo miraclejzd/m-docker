@@ -63,6 +63,14 @@ func CreateConfig(ctx *cli.Context) (*Config, error) {
 		}
 	}
 
+	// 判断容器在前台运行还是后台运行
+	tty := ctx.Bool("it")
+	detach := ctx.Bool("detach")
+	if tty && detach { // 特判同时设置 -it 和 -d 的情况
+		return nil, fmt.Errorf("it and detach can not be set at the same time")
+	}
+	// 这里并不需要判断 detach 为 true 的情况，因为 detach 为 true 时，tty 必为 false
+
 	return &Config{
 		ID:          containerID,
 		Name:        containerName,
@@ -70,7 +78,7 @@ func CreateConfig(ctx *cli.Context) (*Config, error) {
 		RwLayer:     path.Join(rootPath, "layers", containerID),
 		StateDir:    path.Join(statePath, containerID),
 		Mounts:      mounts,
-		TTY:         ctx.Bool("it"),
+		TTY:         tty,
 		CmdArray:    cmdArray,
 		Cgroup:      createCgroupConfig(ctx, containerID),
 		CreatedTime: createdTime,

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"m-docker/libcontainer"
 	"m-docker/libcontainer/config"
+	"syscall"
 
 	log "github.com/sirupsen/logrus"
 	"github.com/urfave/cli"
@@ -18,6 +19,10 @@ var RunCommand = cli.Command{
 		cli.BoolFlag{
 			Name:  "it", // 简单起见，这里把 -i 和 -t 合并了
 			Usage: "enable tty",
+		},
+		cli.BoolFlag{
+			Name:  "d, detach", // 后台运行
+			Usage: "detach container",
 		},
 		cli.StringFlag{
 			Name:  "mem", // 内存限制
@@ -48,7 +53,29 @@ var RunCommand = cli.Command{
 			return fmt.Errorf("create config error: %v", err)
 		}
 
-		run(conf)
+		// 若为前台运行，则由当前这个 m-docker run 进程直接管理容器生命周期
+		// 启动容器进程后，当前进程会阻塞，等待容器运行结束
+		if conf.TTY {
+			run(conf)
+		} else { // 后台运行
+			// 打印容器 ID
+			fmt.Printf("%v\n", conf.ID)
+
+			// fork 一个进程作为 shim 来管理容器生命周期
+			// 之后当前这个 m-docker run 进程就可以退出了
+			pid, _, errno := syscall.RawSyscall(syscall.SYS_FORK, 0, 0, 0)
+			if errno != 0 {
+				return fmt.Errorf("fork error: %v", err)
+			}
+
+			// 子进程
+			if pid == 0 {
+				log.Debugf("[shim process] fork success")
+				run(conf)
+			} else { // 父进程
+				log.Debugf("[father process]fork shim process, pid: %d", pid)
+			}
+		}
 
 		return nil
 	},
