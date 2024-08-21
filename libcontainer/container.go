@@ -87,6 +87,7 @@ func (c *Container) Start() error {
 
 // 清理容器数据
 func (c *Container) Remove() {
+	log.Debugf("Remove container %s", c.Config.ID)
 	// 删除容器的状态信息
 	config.DeleteContainerState(c.Config)
 

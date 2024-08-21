@@ -73,7 +73,7 @@ var RunCommand = cli.Command{
 				log.Debugf("[shim process] fork success")
 				run(conf)
 			} else { // 父进程
-				log.Debugf("[father process]fork shim process, pid: %d", pid)
+				log.Debugf("[father process] fork shim process, pid: %d", pid)
 			}
 		}
 
