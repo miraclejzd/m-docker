@@ -55,3 +55,7 @@
 - [chapter8 - 实现 -v 数据卷挂载](./docs/source-analysis/chapter8-实现-v数据卷挂载.md)
 
   tag: **feat-volume**
+
+- [chapter9 - 实现 -d 后台运行](./docs/source-analysis/chapter9-实现-d后台运行.md)
+  
+  tag: **feat-detach**
