@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"m-docker/libcontainer/cgroup"
 	"m-docker/libcontainer/config"
+	"m-docker/libcontainer/constant"
 	"os"
 	"os/exec"
 	"strings"
@@ -65,6 +66,7 @@ func (c *Container) Start() error {
 		return fmt.Errorf("failed to run process.Start(): %v", err)
 	}
 	c.Config.Pid = process.Process.Pid
+	c.Config.Status = constant.ContainerRunning
 
 	// 将容器的配置信息持久化到磁盘上
 	if err := config.RecordContainerConfig(c.Config); err != nil {
