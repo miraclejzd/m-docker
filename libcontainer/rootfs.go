@@ -3,6 +3,7 @@ package libcontainer
 import (
 	"fmt"
 	"m-docker/libcontainer/config"
+	"m-docker/libcontainer/constant"
 	"os"
 	"os/exec"
 	"path"
@@ -11,13 +12,10 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-// m-docker 数据的根目录
-var rootPath = "/var/lib/m-docker"
-
 // 创建容器的 rootfs 目录
 func CreateRootfs(conf *config.Config) error {
-	imagePath := path.Join(rootPath, "images", "ubuntu.tar")
-	imageLayerPath := path.Join(rootPath, "layers", "ubuntu")
+	imagePath := path.Join(constant.RootPath, "images", "ubuntu.tar")
+	imageLayerPath := path.Join(constant.RootPath, "layers", "ubuntu")
 
 	// 首先解压镜像
 	if err := unzipImageLayer(imagePath, imageLayerPath); err != nil {

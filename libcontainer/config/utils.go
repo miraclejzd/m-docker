@@ -4,6 +4,7 @@ import (
 	"crypto/sha256"
 	"encoding/json"
 	"fmt"
+	"m-docker/libcontainer/constant"
 	"os"
 	"path"
 	"strings"
@@ -17,18 +18,6 @@ import (
 const (
 	// 默认 CPU 硬限制调度周期为 100000us
 	defaultCPUPeriod = 100000
-
-	// cgroup 根目录
-	cgroupRootPath = "/sys/fs/cgroup/m-docker.slice"
-
-	// m-docker 数据的根目录
-	rootPath = "/var/lib/m-docker"
-
-	// m-docker 状态信息的根目录
-	statePath = "/run/m-docker"
-
-	// 容器 Config 文件名
-	configName = "config.json"
 )
 
 // 生成容器的 Config 配置
@@ -74,9 +63,9 @@ func CreateConfig(ctx *cli.Context) (*Config, error) {
 	return &Config{
 		ID:          containerID,
 		Name:        containerName,
-		Rootfs:      path.Join(rootPath, "rootfs", containerID),
-		RwLayer:     path.Join(rootPath, "layers", containerID),
-		StateDir:    path.Join(statePath, containerID),
+		Rootfs:      path.Join(constant.RootPath, "rootfs", containerID),
+		RwLayer:     path.Join(constant.RootPath, "layers", containerID),
+		StateDir:    path.Join(constant.StatePath, containerID),
 		Mounts:      mounts,
 		TTY:         tty,
 		CmdArray:    cmdArray,
@@ -147,7 +136,7 @@ func createCgroupConfig(ctx *cli.Context, containerID string) *Cgroup {
 
 	return &Cgroup{
 		Name:      name,
-		Path:      path.Join(cgroupRootPath, name+".scope"),
+		Path:      path.Join(constant.CgroupRootPath, name+".scope"),
 		Resources: createCgroupResource(ctx),
 	}
 }
@@ -189,7 +178,7 @@ func RecordContainerConfig(conf *Config) error {
 		return fmt.Errorf("failed to marshal container config:  %v", err)
 	}
 	jsonStr := string(jsonBytes)
-	filePath := path.Join(conf.StateDir, configName)
+	filePath := path.Join(conf.StateDir, constant.ConfigName)
 	file, err := os.Create(filePath)
 	defer func() {
 		if err := file.Close(); err != nil {
