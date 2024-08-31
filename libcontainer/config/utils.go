@@ -23,7 +23,8 @@ const (
 // 生成容器的 Config 配置
 func CreateConfig(ctx *cli.Context) (*Config, error) {
 	// 容器创建时间
-	createdTime := time.Now().Format("2024-07-30 00:28:58")
+	utcPlus8 := time.FixedZone("UTC+8", 8*60*60)
+	createdTime := time.Now().In(utcPlus8).Format("2006-01-02 15:04:05")
 
 	// 从命令行参数中获取容器名称
 	containerName := ctx.String("name")
@@ -198,4 +199,29 @@ func RecordContainerConfig(conf *Config) error {
 // 删除容器的状态信息
 func DeleteContainerState(conf *Config) {
 	os.RemoveAll(conf.StateDir)
+}
+
+// 根据容器状态目录的路径获取容器 Config
+func GetConfigFromPath(statePath string) (*Config, error) {
+	// 拼接配置文件的路径
+	configPath := path.Join(statePath, constant.ConfigName)
+
+	// 读取配置文件
+	content, err := os.ReadFile(configPath)
+	if err != nil {
+		return nil, fmt.Errorf("failed to read file %s: %v", configPath, err)
+	}
+
+	conf := new(Config)
+	if err := json.Unmarshal(content, conf); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal %s: %v", configPath, err)
+	}
+
+	return conf, nil
+}
+
+// 根据容器 ID 获取容器 Config
+func GetConfigFromID(id string) (*Config, error) {
+	path := path.Join(constant.StatePath, id)
+	return GetConfigFromPath(path)
 }
