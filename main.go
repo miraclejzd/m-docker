@@ -28,6 +28,7 @@ func main() {
 	app.Commands = []cli.Command{
 		cmd.RunCommand,
 		cmd.InitCommand,
+		cmd.ContainerListCommand,
 	}
 	// 全局 flag
 	app.Flags = []cli.Flag{

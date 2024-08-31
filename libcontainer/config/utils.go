@@ -201,27 +201,37 @@ func DeleteContainerState(conf *Config) {
 	os.RemoveAll(conf.StateDir)
 }
 
-// 根据容器状态目录的路径获取容器 Config
-func GetConfigFromPath(statePath string) (*Config, error) {
-	// 拼接配置文件的路径
+// 根据容器状态目录路径获取容器 Config
+func GetConfigFromStatePath(statePath string) (*Config, error) {
 	configPath := path.Join(statePath, constant.ConfigName)
-
-	// 读取配置文件
 	content, err := os.ReadFile(configPath)
 	if err != nil {
 		return nil, fmt.Errorf("failed to read file %s: %v", configPath, err)
 	}
 
 	conf := new(Config)
-	if err := json.Unmarshal(content, conf); err != nil {
-		return nil, fmt.Errorf("failed to unmarshal %s: %v", configPath, err)
+	if json.Unmarshal(content, conf) != nil {
+		return nil, fmt.Errorf("failed to unmarshal json content: %v", err)
 	}
-
 	return conf, nil
 }
 
 // 根据容器 ID 获取容器 Config
 func GetConfigFromID(id string) (*Config, error) {
-	path := path.Join(constant.StatePath, id)
-	return GetConfigFromPath(path)
+	if len(id) == 12 {
+		files, err := os.ReadDir(constant.StatePath)
+		if err != nil {
+			return nil, fmt.Errorf("read dir %s error: %v", constant.StatePath, err)
+		}
+
+		for _, file := range files {
+			if strings.HasPrefix(file.Name(), id) {
+				id = file.Name()
+				break
+			}
+		}
+	}
+
+	statePath := path.Join(constant.StatePath, id)
+	return GetConfigFromStatePath(statePath)
 }
