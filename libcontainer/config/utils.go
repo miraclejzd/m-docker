@@ -230,6 +230,8 @@ func GetConfigFromID(id string) (*Config, error) {
 				break
 			}
 		}
+	} else if len(id) != 64 {
+		return nil, fmt.Errorf("invalid container ID")
 	}
 
 	statePath := path.Join(constant.StatePath, id)
