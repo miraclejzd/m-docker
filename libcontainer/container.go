@@ -82,7 +82,7 @@ func (c *Container) Start() error {
 	sendInitCommand(c.Config.CmdArray, writePipe)
 
 	// 等待容器进程结束
-	_ = process.Wait()
+	err = process.Wait()
 
 	return nil
 }
@@ -121,14 +121,34 @@ func newContainerProcess(conf *config.Config) (*exec.Cmd, *os.File, error) {
 			syscall.CLONE_NEWNET | syscall.CLONE_NEWIPC,
 	}
 
+	// 将 readPipe 通过子进程的 cmd.ExtraFile 传递给子进程
+	cmd.ExtraFiles = []*os.File{readPipe}
+
 	// 如果用户指定了 -it 参数，就需要把容器进程的输入输出导入到标准输入输出上
 	if conf.TTY {
 		cmd.Stdin = os.Stdin
 		cmd.Stdout = os.Stdout
 		cmd.Stderr = os.Stderr
+	} else { // 否则将容器进程的输出重定向到日志文件
+		// 创建容器的状态信息目录
+		if err := os.MkdirAll(conf.StateDir, 0777); err != nil {
+			return nil, nil, fmt.Errorf("failed to create container state dir:  %v", err)
+		}
+
+		// 创建容器的日志文件
+		logFile, err := os.Create(conf.LogPath)
+		if err != nil {
+			return nil, nil, fmt.Errorf("failed to create log file: %v", err)
+		}
+		// 这里一定不能关闭文件描述符，不然子进程无法访问，会导致日志文件无法写入
+		//defer logFile.Close()
+
+		// 将日志文件通过子进程的 cmd.ExtraFile 传递给子进程
+		cmd.ExtraFiles = append(cmd.ExtraFiles, logFile)
+
+		cmd.Stdout = logFile
+		cmd.Stderr = logFile
 	}
-	// 将 readPipe 通过子进程的 cmd.ExtraFile 传递给子进程
-	cmd.ExtraFiles = []*os.File{readPipe}
 
 	// 设置容器进程的工作目录为 UnionFS 联合挂载后所得到的 rootfs 目录
 	cmd.Dir = conf.Rootfs

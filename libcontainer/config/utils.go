@@ -67,6 +67,7 @@ func CreateConfig(ctx *cli.Context) (*Config, error) {
 		Rootfs:      path.Join(constant.RootPath, "rootfs", containerID),
 		RwLayer:     path.Join(constant.RootPath, "layers", containerID),
 		StateDir:    path.Join(constant.StatePath, containerID),
+		LogPath:     path.Join(constant.StatePath, containerID, constant.LogFileName),
 		Mounts:      mounts,
 		TTY:         tty,
 		CmdArray:    cmdArray,
@@ -218,22 +219,49 @@ func GetConfigFromStatePath(statePath string) (*Config, error) {
 
 // 根据容器 ID 获取容器 Config
 func GetConfigFromID(id string) (*Config, error) {
-	if len(id) == 12 {
-		files, err := os.ReadDir(constant.StatePath)
-		if err != nil {
-			return nil, fmt.Errorf("read dir %s error: %v", constant.StatePath, err)
-		}
-
-		for _, file := range files {
-			if strings.HasPrefix(file.Name(), id) {
-				id = file.Name()
-				break
-			}
-		}
-	} else if len(id) != 64 {
-		return nil, fmt.Errorf("invalid container ID")
+	// 获取容器完整 ID
+	fullID, err := GetIDFromPrefix(id)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get container ID: %v", err)
 	}
 
-	statePath := path.Join(constant.StatePath, id)
+	statePath := path.Join(constant.StatePath, fullID)
 	return GetConfigFromStatePath(statePath)
+}
+
+// 根据容器 ID 的前缀还原完整的容器 ID
+func GetIDFromPrefix(id string) (string, error) {
+	files, err := os.ReadDir(constant.StatePath)
+	if err != nil {
+		return "", fmt.Errorf("read dir %s error: %v", constant.StatePath, err)
+	}
+	// 遍历所有容器状态目录，找到 ID 前缀匹配的容器
+	for _, file := range files {
+		if strings.HasPrefix(file.Name(), id) {
+			return file.Name(), nil
+		}
+	}
+	return "", fmt.Errorf("container \"%s\" not found", id)
+}
+
+// 从容器名称获取容器 ID
+func GetIDFromName(name string) (string, error) {
+	dirs, err := os.ReadDir(constant.StatePath)
+	if err != nil {
+		return "", fmt.Errorf("read dir %s error: %v", constant.StatePath, err)
+	}
+
+	for _, dir := range dirs {
+		statePath := path.Join(constant.StatePath, dir.Name())
+		conf, err := GetConfigFromStatePath(statePath)
+		if err != nil {
+			return "", fmt.Errorf("get config from state path %s error: %v", dir.Name(), err)
+		}
+
+		if conf.Name == name {
+			return dir.Name(), nil
+		}
+	}
+
+	return "", fmt.Errorf("container \"%s\" not found", name)
 }

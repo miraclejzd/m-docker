@@ -29,6 +29,7 @@ func main() {
 		cmd.RunCommand,
 		cmd.InitCommand,
 		cmd.ContainerListCommand,
+		cmd.LogsCommand,
 	}
 	// 全局 flag
 	app.Flags = []cli.Flag{

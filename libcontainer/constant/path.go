@@ -15,4 +15,7 @@ const (
 
 	// 容器 Config 文件名
 	ConfigName = "config.json"
+
+	// 容器日志文件名
+	LogFileName = "log.json"
 )

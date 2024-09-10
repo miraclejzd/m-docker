@@ -23,6 +23,9 @@ type Config struct {
 	// 容器的状态信息路径
 	StateDir string `json:"stateDir"`
 
+	// 容器的日志文件路径
+	LogPath string `json:"logPath"`
+
 	// 容器与宿主机的挂载
 	Mounts []*Mount `json:"mounts"`
 
