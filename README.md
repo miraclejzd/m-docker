@@ -6,9 +6,19 @@
 
 但无论如何，做好记录，便是对学习的过程所表示的尊重。
 
-# Contents
+# 1. QuickStart
 
-## 底层技术
+克隆仓库之后，进入项目根目录，执行以下命令：
+
+```bash
+make demo
+```
+
+这将构建 m-docker 二进制文件，并运行一个简单的容器。
+
+# 2. Contents
+
+## 2.1. 底层技术
 
 - [namespace](./docs/basics/namespace/readme.md)
 
@@ -16,9 +26,9 @@
 
 - [UnionFS](./docs/basics/UnionFS/readme.md)
 
-## 具体实现
+## 2.2. 具体实现
 
-### 1. 构造容器
+### 2.2.1. 构造简单容器
 
 构造一个简单的容器，具有最基本的隔离与资源限制。
 
@@ -42,7 +52,7 @@
 
   tag: **feat-overlay**
 
-### 2. 容器进阶
+### 2.2. 容器进阶
 
 - [chapter6 - 重构！添加容器 Config](./docs/source-analysis/chapter6-重构！添加容器Config.md)
   
