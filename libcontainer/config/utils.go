@@ -265,3 +265,16 @@ func GetIDFromName(name string) (string, error) {
 
 	return "", fmt.Errorf("container \"%s\" not found", name)
 }
+
+// 从容器名称或 ID 前缀获取容器完整 ID
+func GetIDFromNameOrPrefix(nameOrID string) (string, error) {
+	id, err := GetIDFromName(nameOrID)
+	if err != nil {
+		id, err = GetIDFromPrefix(nameOrID)
+		if err != nil {
+			return "", fmt.Errorf("container %s not found", nameOrID)
+		}
+	}
+
+	return id, nil
+}

@@ -16,17 +16,14 @@ var LogsCommand = cli.Command{
 
 	Action: func(context *cli.Context) error {
 		if len(context.Args()) < 1 {
-			return fmt.Errorf("\"m-docker run\" requires at least 1 argument")
+			return fmt.Errorf("\"m-docker logs\" requires at least 1 argument")
 		}
 
 		// 获取容器 ID
 		c := context.Args().Get(0)
-		id, err := config.GetIDFromName(c)
+		id, err := config.GetIDFromNameOrPrefix(c)
 		if err != nil {
-			id, err = config.GetIDFromPrefix(c)
-			if err != nil {
-				return fmt.Errorf("container %s not found", c)
-			}
+			return fmt.Errorf("failed to get container: %v", err)
 		}
 
 		// 打印容器日志
