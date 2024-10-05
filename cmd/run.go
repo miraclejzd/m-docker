@@ -71,7 +71,7 @@ var RunCommand = cli.Command{
 			// 子进程
 			if pid == 0 {
 				log.Debugf("[shim process] fork success")
-				run(conf)
+				return run(conf)
 			} else { // 父进程
 				log.Debugf("[father process] fork shim process, pid: %d", pid)
 			}
@@ -81,21 +81,24 @@ var RunCommand = cli.Command{
 	},
 }
 
-func run(conf *config.Config) {
+func run(conf *config.Config) error {
 	// 创建容器对象
-	container := libcontainer.NewContainer(conf)
+	container, err := libcontainer.NewContainer(conf)
+	if err != nil {
+		return fmt.Errorf("Create container object error: %v", err)
+	}
 	// 函数结束后释放容器资源
 	defer container.Remove()
 
 	// 创建容器运行环境
 	if err := container.Create(); err != nil {
-		log.Errorf("Create container error: %v", err)
-		return
+		return fmt.Errorf("setup container environment error: %v", err)
 	}
 
 	// 启动容器
 	if err := container.Start(); err != nil {
-		log.Errorf("Start container error: %v", err)
-		return
+		return fmt.Errorf("Start container error: %v", err)
 	}
+
+	return nil
 }

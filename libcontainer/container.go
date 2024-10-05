@@ -19,10 +19,17 @@ type Container struct {
 }
 
 // 创建容器对象
-func NewContainer(conf *config.Config) *Container {
-	return &Container{
-		Config: conf,
+func NewContainer(conf *config.Config) (*Container, error) {
+	// 创建 cgroup 管理器
+	cgroupManager, err := cgroup.NewCgroupManager(conf.Cgroup.Path)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create cgroup manager: %v", err)
 	}
+
+	return &Container{
+		Config:        conf,
+		CgroupManager: cgroupManager,
+	}, nil
 }
 
 // 创建容器的运行环境
@@ -37,18 +44,12 @@ func (c *Container) Create() error {
 		return fmt.Errorf("failed to mount volumes: %v", err)
 	}
 
-	// 创建 cgroup Manager
-	cgroupManager, err := cgroup.NewCgroupManager(c.Config.Cgroup.Path)
-	if err != nil {
-		return fmt.Errorf("failed to create cgroup manager: %v", err)
-	}
-	c.CgroupManager = cgroupManager
 	// 初始化 cgroup
-	if err = cgroupManager.Init(); err != nil {
+	if err := c.CgroupManager.Init(); err != nil {
 		return fmt.Errorf("failed to init cgroup: %v", err)
 	}
 	// 设置 cgroup 的资源限制
-	cgroupManager.Set(c.Config.Cgroup.Resources)
+	c.CgroupManager.Set(c.Config.Cgroup.Resources)
 
 	return nil
 }
