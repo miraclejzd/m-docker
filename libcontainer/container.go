@@ -84,7 +84,7 @@ func (c *Container) Start() error {
 	}
 
 	// 子进程创建之后再通过管道发送参数
-	sendInitCommand(c.Config.CmdArray, writePipe)
+	sendCommand(c.Config.CmdArray, writePipe)
 
 	// 等待容器进程结束
 	err = process.Wait()
@@ -173,9 +173,9 @@ func (c *Container) newInitProcess() (*exec.Cmd, *os.File, error) {
 }
 
 // 通过匿名管道发送参数给子进程
-func sendInitCommand(comArray []string, writePipe *os.File) {
+func sendCommand(comArray []string, writePipe *os.File) {
 	command := strings.Join(comArray, " ")
-	log.Debugf("Send command to init: %s", command)
+	log.Debugf("Send command: %s", command)
 	_, _ = writePipe.WriteString(command)
 	_ = writePipe.Close()
 }
