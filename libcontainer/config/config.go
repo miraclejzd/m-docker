@@ -40,4 +40,7 @@ type Config struct {
 
 	// 容器的创建时间
 	CreatedTime string `json:"createdTime"`
+
+	// 容器的环境变量
+	Env []string `json:"env"`
 }

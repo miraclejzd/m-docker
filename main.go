@@ -30,6 +30,7 @@ func main() {
 		cmd.InitCommand,
 		cmd.ContainerListCommand,
 		cmd.LogsCommand,
+		cmd.ExecCommand,
 	}
 	// 全局 flag
 	app.Flags = []cli.Flag{

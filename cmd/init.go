@@ -10,6 +10,9 @@ import (
 	"strings"
 	"syscall"
 
+	"m-docker/libcontainer/constant"
+	_ "m-docker/libcontainer/nsenter" // 导入 nsenter 包，触发 init 函数
+
 	log "github.com/sirupsen/logrus"
 	"github.com/urfave/cli"
 )
@@ -34,8 +37,19 @@ var InitCommand = cli.Command{
 func initContainer() error {
 	log.Debugf("Start func: initContainer")
 
-	// 挂载根文件系统
-	mountRootFS()
+	// 若没有设置 ENV_NOT_MOUNT_ROOTFS 环境变量，则挂载根文件系统
+	// exec 命令会设置这个环境变量，因为 exec 命令不需要挂载根文件系统
+	if os.Getenv(constant.ENV_NOT_MOUNT_ROOTFS) == "" {
+		mountRootFS()
+	}
+
+	// 通过 mount 挂载容器自己的 proc 文件系统
+	defaultMountFlags := syscall.MS_NOEXEC | syscall.MS_NOSUID | syscall.MS_NODEV
+	_ = syscall.Mount("proc", "/proc", "proc", uintptr(defaultMountFlags), "")
+
+	// 重新挂载 /dev 文件系统
+	// 若不挂载，会导致容器内部无法访问和使用许多设备，这可能导致系统无法正常工作
+	syscall.Mount("tmpfs", "/dev", "tmpfs", syscall.MS_NOSUID|syscall.MS_STRICTATIME, "mode=755")
 
 	// 读取管道中的 command 参数
 	cmdArray := readPipeCommand()
@@ -79,14 +93,6 @@ func mountRootFS() {
 		log.Errorf("pivotRoot error: %v", err)
 		return
 	}
-
-	// 通过 mount 挂载容器自己的 proc 文件系统
-	defaultMountFlags := syscall.MS_NOEXEC | syscall.MS_NOSUID | syscall.MS_NODEV
-	_ = syscall.Mount("proc", "/proc", "proc", uintptr(defaultMountFlags), "")
-
-	// 重新挂载 /dev 文件系统
-	// 若不挂载，会导致容器内部无法访问和使用许多设备，这可能导致系统无法正常工作
-	syscall.Mount("tmpfs", "/dev", "tmpfs", syscall.MS_NOSUID|syscall.MS_STRICTATIME, "mode=755")
 }
 
 // 调用 pivot_root 系统调用，将根文件系统设置为 newRoot

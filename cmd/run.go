@@ -83,7 +83,7 @@ var RunCommand = cli.Command{
 
 func run(conf *config.Config) error {
 	// 创建容器对象
-	container, err := libcontainer.NewContainer(conf)
+	container, err := libcontainer.NewContainer(conf, false)
 	if err != nil {
 		return fmt.Errorf("Create container object error: %v", err)
 	}

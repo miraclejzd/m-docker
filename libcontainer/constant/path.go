@@ -18,4 +18,8 @@ const (
 
 	// 容器日志文件名
 	LogFileName = "log.json"
+
+	// m-docker 的临时数据目录
+	// 例如 exec 命令所创建的容器会使用
+	TmpPath = "/tmp/m-docker"
 )
